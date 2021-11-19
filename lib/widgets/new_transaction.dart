@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
-  final Function(String, double) addTransaction;
+  final Function(String, double, DateTime) addTransaction;
   NewTransaction({required this.addTransaction});
 
   @override
@@ -13,13 +14,15 @@ class _NewTransactionState extends State<NewTransaction> {
 
   final amountController = TextEditingController();
 
+  dynamic _selectedDate;
+
   void submitData() {
     if (titleController.text.isEmpty ||
         double.parse(amountController.text) <= 0) {
       return;
     }
-    widget.addTransaction(
-        titleController.text, double.parse(amountController.text));
+    widget.addTransaction(titleController.text,
+        double.parse(amountController.text), _selectedDate);
     Navigator.of(context).pop();
   }
 
@@ -39,16 +42,43 @@ class _NewTransactionState extends State<NewTransaction> {
               controller: amountController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
             ),
+            Container(
+              height: 70,
+              child: Row(
+                children: [
+                  Text(_selectedDate == null
+                      ? 'No Date Chosen!'
+                      : 'Selected date: ${DateFormat.yMd().format(_selectedDate)}'),
+                  TextButton(
+                      onPressed: () {
+                        showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime.now())
+                            .then((value) => {
+                                  if (value != null)
+                                    {
+                                      setState(() {
+                                        _selectedDate = value;
+                                      })
+                                    }
+                                });
+                      },
+                      child: Text(
+                        'Choose Date',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ))
+                ],
+              ),
+            ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              TextButton(
-                  style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(Colors.purple),
-                      overlayColor: MaterialStateProperty.all(
-                          Colors.purple.withOpacity(0.1))),
+              ElevatedButton(
                   onPressed: submitData,
-                  child: Text(
-                    'Add Transaction',
-                  ))
+                  child: Text('Add Transaction',
+                      style: TextStyle(
+                        color: Colors.white,
+                      )))
             ])
           ],
         ),
