@@ -1,10 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
 import 'widgets/chart.dart';
 import 'widgets/transaction_list.dart';
 import 'models/transaction.dart';
 import 'widgets/new_transaction.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations(
+  //     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -77,28 +85,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: const Text('Flutter App'),
+      actions: [
+        IconButton(
+            onPressed: () => _startAddTransaction(context),
+            icon: Icon(Icons.add))
+      ],
+    );
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter App'),
-        actions: [
-          IconButton(
-              onPressed: () => _startAddTransaction(context),
-              icon: Icon(Icons.add))
-        ],
-      ),
+      appBar: appBar,
       body: Column(
         children: [
-          Chart(_recentTransactions),
-          TransactionList(
-              userTransactions: _transactions,
-              deleteTransaction: _deleteTransaction)
+          Container(
+            child: Switch.adaptive(
+              value: true,
+              onChanged: (val) {},
+            ),
+          ),
+          Container(
+              child: Chart(_recentTransactions),
+              height: MediaQuery.of(context).size.height * 0.4 -
+                  appBar.preferredSize.height -
+                  MediaQuery.of(context).padding.top),
+          Container(
+            child: TransactionList(
+                userTransactions: _transactions,
+                deleteTransaction: _deleteTransaction),
+            height: MediaQuery.of(context).size.height * 0.6 -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top,
+          )
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => _startAddTransaction(context),
-      ),
+      floatingActionButton: Platform.isIOS
+          ? null
+          : FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => _startAddTransaction(context),
+            ),
     );
   }
 }
